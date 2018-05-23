@@ -9,6 +9,12 @@ Usage:
 
 This tool copies modification time to creation time. An exit code of 0 means success, and non-zero means failure.
 
+Example:
+
+    > setctime.exe *.txt
+    
+    foo.txt done
+    bar.txt done
 
 Download
 --------

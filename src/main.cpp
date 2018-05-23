@@ -48,14 +48,26 @@ int wmain()
 
 	for (int i = 1; i < argc; i++)
 	{
-		wprintf_s(L"%s ... ", argv[i]);
-		ret = SetCtime(argv[i]);
-		if (ret != 0)
+		WIN32_FIND_DATA fd;
+		HANDLE hFind = FindFirstFile(argv[i], &fd);
+		if (hFind == INVALID_HANDLE_VALUE)
 		{
-			wprintf_s(L"FAIL (%d)\n", ret);
+			wprintf_s(L"%s ... FAIL\n", argv[i]);
 			break;
 		}
-		wprintf_s(L"done\n");
+
+		do
+		{
+			wprintf_s(L"%s ... ", fd.cFileName);
+			ret = SetCtime(fd.cFileName);
+			if (ret != 0)
+			{
+				wprintf_s(L"FAIL (%d)\n", ret);
+				FindClose(hFind);
+				goto done;
+			}
+			wprintf_s(L"done\n");
+		} while (FindNextFile(hFind, &fd));
 	}
 
 done:

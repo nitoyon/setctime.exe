@@ -5,7 +5,7 @@ The simplest command line tool to set file creation time on Windows
 
 Usage:
 
-    setctime.exe path
+    setctime.exe path1 [path2 [path3 ...]]
 
 This tool copies modification time to creation time. An exit code of 0 means success, and non-zero means failure.
 

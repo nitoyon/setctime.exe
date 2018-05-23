@@ -20,28 +20,57 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// We don't use C Run-Time library in order to
-//   * reduce the file size
-//   * make it possible to run the EXE file on any PC even if VC++ Runtime is
-//     not installed
-
 #include <windows.h>
 #include <tchar.h>
+#include <stdio.h>
+
+int SetCtime(LPWSTR path);
 
 int wmain()
 {
 	int ret = 0;
-	HANDLE hFile = INVALID_HANDLE_VALUE;
 
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(GetCommandLine(), &argc);
-	if (argv == NULL || argc != 2)
+	if (argv == NULL)
 	{
+		wprintf_s(L"Failed to parse\n");
 		ret = 1;
 		goto done;
 	}
 
-	hFile = CreateFile(argv[1], FILE_READ_ATTRIBUTES | FILE_WRITE_ATTRIBUTES, 0,
+	if (argc == 1)
+	{
+		wprintf_s(L"File not specified\n");
+		ret = 1;
+		goto done;
+	}
+
+	for (int i = 1; i < argc; i++)
+	{
+		wprintf_s(L"%s ... ", argv[i]);
+		ret = SetCtime(argv[i]);
+		if (ret != 0)
+		{
+			wprintf_s(L"FAIL (%d)\n", ret);
+			break;
+		}
+		wprintf_s(L"done\n");
+	}
+
+done:
+	if (argv != NULL)
+	{
+		LocalFree(argv);
+	}
+}
+
+int SetCtime(LPWSTR path)
+{
+	int ret = 0;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+
+	hFile = CreateFile(path, FILE_READ_ATTRIBUTES | FILE_WRITE_ATTRIBUTES, 0,
 		NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
@@ -62,10 +91,6 @@ int wmain()
 	}
 
 done:
-	if (argv != NULL)
-	{
-		LocalFree(argv);
-	}
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
 		CloseHandle(hFile);
